@@ -28,13 +28,13 @@ human_interface  ── HTTP (http://127.0.0.1:5000) ──►  money_service  �
 # терминал 1: API-сервис
 cd money_service
 uv venv --python 3.11 && uv pip install -e ".[dev]"
-flask --app app run                      # http://127.0.0.1:5000
+uv run flask --app app run                      # http://127.0.0.1:5000
 
 # терминал 2: агент
 cd human_interface
 uv venv --python 3.11 && uv pip install -r requirements-dev.txt
 cp .env.example .env                     # заполнить OPENAI_API_KEY
-python main.py "запиши покупку продуктов на 5000"
+uv run python main.py "запиши покупку продуктов на 5000"
 ```
 
 Адрес API задаётся переменной `MONEY_SERVICE_BASE_URL` в `.env` агента

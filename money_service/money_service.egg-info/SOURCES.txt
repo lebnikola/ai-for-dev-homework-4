@@ -5,6 +5,7 @@ app/database.py
 app/models.py
 app/repositories.py
 app/routes.py
+app/seed.py
 app/validators.py
 money_service.egg-info/PKG-INFO
 money_service.egg-info/SOURCES.txt
