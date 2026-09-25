@@ -96,4 +96,4 @@ def test_duplicate_error_from_mocked_repo_returns_409():
 def create_app_stub(category_repo):
     from app import create_app
 
-    return create_app(category_repo=category_repo, operation_repo=MagicMock())
+    return create_app(category_repo=category_repo, operation_repo=MagicMock(), seed=False)

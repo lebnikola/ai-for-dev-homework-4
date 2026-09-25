@@ -89,5 +89,5 @@ def operation_repo():
 
 @pytest.fixture
 def client(category_repo, operation_repo):
-    app = create_app(category_repo=category_repo, operation_repo=operation_repo)
+    app = create_app(category_repo=category_repo, operation_repo=operation_repo, seed=False)
     return app.test_client()

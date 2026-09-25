@@ -1,9 +1,12 @@
 from app import create_app
+from app.database import build_engine, build_session_factory
+from app.models import Base, Category
 from app.repositories import DuplicateCategoryError
+from app.seed import DEFAULT_CATEGORIES, seed_categories
 
 
 def test_real_repositories_persist_data():
-    app = create_app()
+    app = create_app(seed=False)
     category_repo = app.extensions["category_repo"]
     operation_repo = app.extensions["operation_repo"]
 
@@ -25,7 +28,7 @@ def test_real_repositories_persist_data():
 
 
 def test_end_to_end_with_real_database():
-    app = create_app()
+    app = create_app(seed=False)
     client = app.test_client()
 
     resp = client.post("/categories", json={"name": "Продукты", "type": "expense"})
@@ -46,7 +49,7 @@ def test_end_to_end_with_real_database():
 
 
 def test_operations_crud_and_balance_with_real_database():
-    app = create_app()
+    app = create_app(seed=False)
     client = app.test_client()
 
     expense_category_id = client.post(
@@ -98,7 +101,7 @@ def test_real_operation_repository_update_missing_returns_none():
 
 
 def test_list_categories_with_real_database():
-    app = create_app()
+    app = create_app(seed=False)
     client = app.test_client()
 
     assert client.get("/categories").get_json() == []
@@ -116,3 +119,38 @@ def test_list_categories_with_real_database():
         {"id": expense_id, "name": "Продукты", "type": "expense"},
         {"id": income_id, "name": "Зарплата", "type": "income"},
     ]
+
+
+def test_default_categories_are_seeded():
+    app = create_app()
+    client = app.test_client()
+
+    categories = client.get("/categories").get_json()
+    assert [(c["name"], c["type"]) for c in categories] == [
+        ("Зарплата", "income"),
+        ("Шабашки", "income"),
+        ("Долги", "income"),
+        ("Продукты", "expense"),
+        ("Кино", "expense"),
+        ("Театр", "expense"),
+        ("Кофе", "expense"),
+        ("Ресторан", "expense"),
+        ("Столовая", "expense"),
+        ("Бензин", "expense"),
+        ("Квартплата", "expense"),
+    ]
+    assert [c["id"] for c in categories] == list(range(1, 12))
+
+    resp = client.post("/categories", json={"name": "Продукты", "type": "expense"})
+    assert resp.status_code == 409
+
+
+def test_seed_is_idempotent():
+    engine = build_engine()
+    Base.metadata.create_all(engine)
+    session_factory = build_session_factory(engine)
+    seed_categories(session_factory)
+    seed_categories(session_factory)
+
+    with session_factory() as session:
+        assert session.query(Category).count() == len(DEFAULT_CATEGORIES)

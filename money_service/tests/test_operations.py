@@ -117,7 +117,7 @@ def test_operation_created_with_server_timestamp():
     )
     operation_repo.create.return_value = created
 
-    app = create_app(category_repo=category_repo, operation_repo=operation_repo)
+    app = create_app(category_repo=category_repo, operation_repo=operation_repo, seed=False)
     resp = app.test_client().post(
         "/operations", json={"type": "income", "amount": 5000, "category_id": 1}
     )
@@ -232,7 +232,7 @@ def test_patch_calls_repository_update_with_validated_fields():
     operation_repo.get_by_id.return_value = stored
     operation_repo.update.return_value = stored
 
-    app = create_app(category_repo=MagicMock(), operation_repo=operation_repo)
+    app = create_app(category_repo=MagicMock(), operation_repo=operation_repo, seed=False)
     resp = app.test_client().patch("/operations/3", json={"amount": 500})
 
     assert resp.status_code == 200
@@ -288,7 +288,7 @@ def test_patch_operation_lost_during_update_returns_404():
     operation_repo.get_by_id.return_value = stored
     operation_repo.update.return_value = None
 
-    app = create_app(category_repo=MagicMock(), operation_repo=operation_repo)
+    app = create_app(category_repo=MagicMock(), operation_repo=operation_repo, seed=False)
     resp = app.test_client().patch("/operations/3", json={"amount": 500})
 
     assert resp.status_code == 404
